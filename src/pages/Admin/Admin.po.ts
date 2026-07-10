@@ -309,9 +309,30 @@ export class AdminPage extends BasePage {
     console.log(`[AdminPage] Delete user confirmation popup with message "${expectedMessage}" is visible`);
   } 
   public async clickDeleteButtonfromtheTable(){
-    const firstUserTableDeleteButton = this.page.locator('.oxd-table-card').first().locator('button:has(.bi-trash)').first();
-    await expect(firstUserTableDeleteButton).toBeVisible({ timeout: 5000 });
-    await firstUserTableDeleteButton.click();
+    const tableRows = this.page.locator('.oxd-table-body .oxd-table-card');
+    await expect(tableRows.first()).toBeVisible({ timeout: 10000 });
+    const count = await tableRows.count();
+    let clicked = false;
+    for (let i = 0; i < count; i++) {
+      const row = tableRows.nth(i);
+      const usernameCell = row.locator('.oxd-table-cell').nth(1);
+      const username = await usernameCell.innerText().catch(() => '');
+      if (username.trim().toLowerCase() !== 'admin') {
+        const deleteButton = row.locator('button:has(.bi-trash)').first();
+        if (await deleteButton.isVisible()) {
+          console.log(`[AdminPage] Clicking delete button for user: "${username.trim()}"`);
+          await deleteButton.click();
+          clicked = true;
+          break;
+        }
+      }
+    }
+    if (!clicked) {
+      console.log(`[AdminPage] Fallback: Clicking delete button for first row`);
+      const deleteButton = tableRows.first().locator('button:has(.bi-trash)').first();
+      await expect(deleteButton).toBeVisible({ timeout: 5000 });
+      await deleteButton.click();
+    }
   }
   public async verifyDeleteUserSuccessMessage(successMessage:string){
     const successMessageLocator = this.page.locator('.oxd-toast-content').first();

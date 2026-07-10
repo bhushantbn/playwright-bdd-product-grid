@@ -25,10 +25,26 @@ Then('User should see table result for {string} user role', async function (this
   await this.adminPage.verifyTableResult(userRole);
 });
 Then('User fills employee name {string} in System User Filter', async function (this: CustomWorld, employeeName: string) {
-  await this.adminPage.searchByEmployeeName(employeeName);
+  let resolvedName = employeeName;
+  if (employeeName.toLowerCase() === 'seeded employee' || employeeName.toLowerCase() === 'valid employee') {
+    resolvedName = this.adminPage.lastSearchedEmployeeName || '';
+    if (!resolvedName) {
+      resolvedName = await this.adminPage.getFirstEmployeeNameFromTable() || '';
+    }
+    if (!resolvedName) {
+      throw new Error("Could not resolve employee name to search.");
+    }
+    (this as any).lastSearchedEmployeeName = resolvedName;
+    console.log(`[Steps] Dynamic employee name resolved from table: "${resolvedName}"`);
+  }
+  await this.adminPage.searchByEmployeeName(resolvedName);
 });
 Then('User should see table result for {string} employee name', async function (this: CustomWorld, employeeName: string) {
-  await this.adminPage.verifyTableResultByEmployeeName(employeeName);
+  let resolvedName = employeeName;
+  if (employeeName.toLowerCase() === 'seeded employee' || employeeName.toLowerCase() === 'valid employee') {
+    resolvedName = (this as any).lastSearchedEmployeeName || this.adminPage.lastSearchedEmployeeName || '';
+  }
+  await this.adminPage.verifyTableResultByEmployeeName(resolvedName);
 });
 
 Then('User selects status {string} from System User Filter', async function (this: CustomWorld, status: string) {

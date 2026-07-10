@@ -1,6 +1,6 @@
 module.exports = {
   default: {
-    parallel: 3,
+    parallel: process.env.PARALLEL ? parseInt(process.env.PARALLEL, 10) : 1,
     formatOptions: {
       snippetInterface: "async-await"
     },

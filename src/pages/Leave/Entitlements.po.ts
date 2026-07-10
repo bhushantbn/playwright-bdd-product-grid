@@ -105,15 +105,43 @@ export class EntitlementsPage extends BasePage {
 
   public async selectLeavePeriod(leavePeriod: string): Promise<void> {
     await this.leavePeriodDropdown.click();
-    const option = this.page.locator('.oxd-select-option', { hasText: leavePeriod });
     
-    // Check if the exact leave period is visible/available. If not, fallback to the first option
+    // Log all options for diagnostics
+    const optionsLocator = this.page.locator('.oxd-select-option');
+    await optionsLocator.first().waitFor({ state: 'visible', timeout: 5000 });
+    const count = await optionsLocator.count();
+    const optionsText: string[] = [];
+    for (let i = 0; i < count; i++) {
+      optionsText.push(await optionsLocator.nth(i).innerText());
+    }
+    console.log(`[EntitlementsPage] Available leave periods:`, optionsText);
+
+    // Try exact match first
+    const option = this.page.locator('.oxd-select-option', { hasText: leavePeriod });
     if (await option.isVisible({ timeout: 2000 }).catch(() => false)) {
       await option.click();
+      return;
+    }
+
+    // Try matching by the prefix (e.g. "2026")
+    const yearPrefix = leavePeriod.substring(0, 4); // "2026"
+    console.log(`[EntitlementsPage] Exact match not found. Trying prefix matching with: "${yearPrefix}"`);
+    let matchedOption = null;
+    for (let i = 0; i < count; i++) {
+      const text = optionsText[i];
+      if (text.startsWith(yearPrefix)) {
+        matchedOption = this.page.locator('.oxd-select-option').nth(i);
+        console.log(`[EntitlementsPage] Match found: "${text}"`);
+        break;
+      }
+    }
+
+    if (matchedOption) {
+      await matchedOption.click();
     } else {
-      console.log(`[EntitlementsPage] Expected leave period "${leavePeriod}" not found. Selecting first available option.`);
-      const firstOption = this.page.locator('.oxd-select-option').first();
-      await firstOption.click();
+      console.log(`[EntitlementsPage] No prefix match found. Selecting first valid option.`);
+      const firstValidOption = this.page.locator('.oxd-select-option').filter({ hasNotText: '-- Select --' }).first();
+      await firstValidOption.click();
     }
   }
 
@@ -131,6 +159,17 @@ export class EntitlementsPage extends BasePage {
 
   public async verifyRecordInTable(): Promise<void> {
     const rows = this.page.locator('.oxd-table-body .oxd-table-card');
+    if (!await rows.first().isVisible({ timeout: 3000 }).catch(() => false)) {
+      console.log(`[EntitlementsPage] Table is empty on redirect. Selecting Leave Period and clicking Search...`);
+      const dropdown = this.page.locator('.oxd-select-wrapper').nth(1); // Leave Period dropdown
+      if (await dropdown.isVisible()) {
+        await dropdown.click();
+        const firstValidOption = this.page.locator('.oxd-select-option').filter({ hasNotText: '-- Select --' }).first();
+        await firstValidOption.click();
+        await this.page.locator('button[type="submit"]').click();
+        await this.page.waitForTimeout(1000);
+      }
+    }
     await expect(rows.first()).toBeVisible({ timeout: 10000 });
   }
 

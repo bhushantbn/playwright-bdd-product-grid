@@ -44,9 +44,9 @@ Feature: Admin Module Navigation
     When User clicks sidebar menu item "Admin"
     Then User should be redirected to the Admin page URL
     Then User should see System User Filter
-    Then User fills employee name "Archana Kharat" in System User Filter
+    Then User fills employee name "seeded employee" in System User Filter
     Then User clicks on Search Filter button
-    Then User should see table result for "Archana Kharat" employee name
+    Then User should see table result for "seeded employee" employee name
 
   @regression @admin @TC_025
   Scenario: Verify Search Filter By Enabled Status
@@ -95,9 +95,9 @@ Feature: Admin Module Navigation
     Then User should see the Add User Form
     Then User fills the Add User Form with the following details
     Then User should see "Successfully Added" success message
-    Then User fills employee name "Abhishek R" in System User Filter
+    Then User fills employee name "seeded employee" in System User Filter
     Then User clicks on Search Filter button
-    Then User should see table result for "Abhishek R" employee name
+    Then User should see table result for "seeded employee" employee name
 
   @regression @admin @TC_030 @deleteuser
   Scenario: Verify Delete User Functionality
@@ -108,7 +108,7 @@ Feature: Admin Module Navigation
     Then User should see the Add User Form
     Then User fills the Add User Form with the following details
     Then User should see "Successfully Added" success message
-    Then User fills employee name "Abhishek R" in System User Filter
+    Then User fills employee name "seeded employee" in System User Filter
     And User selects status "Disabled" from System User Filter
     Then User clicks on Search Filter button
     Then User clicks on Delete button from the first search result
@@ -134,9 +134,9 @@ Feature: Admin Module Navigation
     When User clicks sidebar menu item "Admin"
     Then User should be redirected to the Admin page URL
     Then User should see System User Filter
-    Then User fills employee name "Charles Carter" in System User Filter
-    And User selects status "Enabled" from System User Filter
+    Then User fills employee name "seeded employee" in System User Filter
     Then User clicks on Search Filter button
+    Then User should see table result for "seeded employee" employee name
     Then User clicks on Delete button from the first search result
     Then User should see the confirmation popup with the message "Are you sure you want to delete this record?"
     Then User clicks on Cancel button

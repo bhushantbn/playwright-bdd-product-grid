@@ -71,7 +71,7 @@ Feature: Assign Leave Functionality
     And Add Leave entitlement radio button should be selected as "Individual Typle"
     Then User enters employee name "seeded employee"
     Then User selects leave type "CAN - Bereavement"
-    Then User selects leave period as "2026-01-01 - 2026-31-12"
+    Then User selects leave period as "2026-01-01 - 2027-30-06"
     Then User enters number of days "1"
     Then User clicks the save button
     Then User should see confirm dialog box
