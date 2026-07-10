@@ -79,12 +79,6 @@ jobs:
           ENV: ${{ github.event.inputs.environment || 'dev' }}
           BROWSER_NAME: ${{ github.event.inputs.browser || 'chromium' }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-          AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
-          JIRA_HOST: ${{ secrets.JIRA_HOST }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
-          JIRA_INTEGRATION_ENABLED: ${{ secrets.JIRA_INTEGRATION_ENABLED }}
         run: |
           if [ -z "${{ github.event.inputs.tags }}" ]; then
             npx cross-env cucumber-js
