@@ -1,14 +1,39 @@
-name: Playwright BDD Test Suite CI
+name: Playwright BDD Test Suite CI/CD
 
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      browser:
+        description: 'Browser Name (chromium, firefox, webkit)'
+        required: true
+        default: 'chromium'
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+      tags:
+        description: 'Cucumber Tags to filter tests (e.g., @login, @admin)'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   test:
-    name: Run Automated Tests
+    name: Run BDD Tests (${{ github.event.inputs.environment || 'dev' }} - ${{ github.event.inputs.browser || 'chromium' }})
     runs-on: ubuntu-latest
 
     steps:
@@ -24,20 +49,66 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers and System Dependencies
+      - name: Get Playwright Version
+        id: playwright-version
+        run: echo "version=$(npx playwright --version | cut -d' ' -f2)" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright Browsers
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Browsers and Dependencies
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
+
+      - name: Install Playwright System Dependencies Only
+        if: steps.cache-playwright.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+      - name: Setup Auth Session
+        run: npm run auth:setup
+        env:
+          ENV: ${{ github.event.inputs.environment || 'dev' }}
+          BROWSER_NAME: ${{ github.event.inputs.browser || 'chromium' }}
 
       - name: Run Cucumber Tests
         env:
-          ENV: dev
+          ENV: ${{ github.event.inputs.environment || 'dev' }}
+          BROWSER_NAME: ${{ github.event.inputs.browser || 'chromium' }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
           AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
-        run: npm run test
+          JIRA_HOST: ${{ secrets.JIRA_HOST }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+          JIRA_INTEGRATION_ENABLED: ${{ secrets.JIRA_INTEGRATION_ENABLED }}
+        run: |
+          if [ -z "${{ github.event.inputs.tags }}" ]; then
+            npx cross-env cucumber-js
+          else
+            npx cross-env cucumber-js --tags "${{ github.event.inputs.tags }}"
+          fi
 
-      - name: Upload Test Report
+      - name: Upload Test Report Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cucumber-report
+          name: cucumber-report-${{ github.event.inputs.environment || 'dev' }}-${{ github.event.inputs.browser || 'chromium' }}
           path: test-results/
-          retention-days: 10
+          retention-days: 14
+
+      - name: Job Summary Report
+        if: always()
+        run: |
+          echo "### 🚀 Test Run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Browser:** ${{ github.event.inputs.browser || 'chromium' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered By:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          if [ ! -z "${{ github.event.inputs.tags }}" ]; then
+            echo "- **Tags Filter:** \`${{ github.event.inputs.tags }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please download the **cucumber-report** artifact from the run page to view full execution details and HTML report." >> $GITHUB_STEP_SUMMARY
