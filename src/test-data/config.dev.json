@@ -1,0 +1,10 @@
+{
+  "baseUrl": "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login",
+  "browserName": "chromium",
+  "headless": true,
+  "defaultTimeout": 15000,
+  "azureStorage": {
+    "connectionString": "DefaultEndpointsProtocol=https;AccountName=devaccount;AccountKey=devkey;EndpointSuffix=core.windows.net",
+    "containerName": "test-artifacts-dev"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "baseUrl": "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login",
+  "browserName": "firefox",
+  "headless": true,
+  "defaultTimeout": 20000,
+  "azureStorage": {
+    "connectionString": "DefaultEndpointsProtocol=https;AccountName=stagingaccount;AccountKey=stagingkey;EndpointSuffix=core.windows.net",
+    "containerName": "test-artifacts-staging"
+  }
+}

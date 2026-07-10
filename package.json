@@ -1,0 +1,40 @@
+{
+  "name": "playwright-bdd-production-grid",
+  "version": "1.0.0",
+  "description": "Playwright TypeScript Cucumber BDD + POM Automation Framework",
+  "main": "index.js",
+  "scripts": {
+    "clean": "npx rimraf test-results",
+    "auth:setup": "ts-node src/utils/authSetup.ts",
+    "test": "npm run auth:setup && cross-env ENV=dev cucumber-js",
+    "test:headed": "npm run auth:setup && cross-env ENV=dev HEADLESS=false cucumber-js",
+    "test:staging": "cross-env ENV=staging cucumber-js",
+    "test:prod": "cross-env ENV=prod cucumber-js",
+    "report": "start test-results/cucumber-report.html",
+    "build": "tsc"
+  },
+  "keywords": [
+    "playwright",
+    "cucumber",
+    "bdd",
+    "typescript",
+    "pom",
+    "automation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/storage-blob": "^12.24.0",
+    "@faker-js/faker": "^10.5.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.8.0",
+    "@playwright/test": "^1.44.1",
+    "@types/node": "^20.14.2",
+    "cross-env": "^7.0.3",
+    "rimraf": "^5.0.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
