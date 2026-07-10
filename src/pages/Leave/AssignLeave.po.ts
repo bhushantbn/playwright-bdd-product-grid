@@ -2,6 +2,7 @@ import { expect, Page } from '@playwright/test';
 import { BasePage } from '../BasePage';
 import { UIElement } from '../../utils/UIElement';
 import { ConfigManager } from '../../config/ConfigManager';
+import { LoginPage } from '../Login/Login.po';
 
 export class AssignLeavePage extends BasePage {
   private employeeInput: UIElement;
@@ -35,6 +36,16 @@ export class AssignLeavePage extends BasePage {
       try {
         attempts++;
         await this.page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        
+        // Safe fallback: if session expired or failed, perform manual login
+        if (this.page.url().includes('/auth/login')) {
+          console.log('[AssignLeavePage] Redirected to login page. Performing fallback login...');
+          const loginPage = new LoginPage(this.page);
+          await loginPage.login('Admin', 'admin123');
+          // Navigate to target page again after logging in
+          await this.page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        }
+
         await this.assignButton.waitForVisible(8000);
         return; // Success
       } catch (error) {

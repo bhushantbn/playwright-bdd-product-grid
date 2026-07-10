@@ -9,23 +9,26 @@ Given('User navigates to the Assign Leave page', async function (this: CustomWor
 
 When('User enters employee name {string}', async function (this: CustomWorld, name: string) {
   const url = this.page ? this.page.url() : '';
-  if (url.includes('Entitlement') || url.includes('entitlement')) {
-    await this.entitlementsPage.enterEmployeeName(name);
-    console.log("employee name entered on entitlements page successfully.");
-    return;
+  let resolvedName = name;
+
+  if (name.toLowerCase() === 'seeded employee' || name.toLowerCase() === 'valid employee') {
+    if ((this as any).resolvedSeededEmployee) {
+      resolvedName = (this as any).resolvedSeededEmployee;
+    } else {
+      resolvedName = await this.assignLeavePage.getSeededEmployeeName();
+      (this as any).resolvedSeededEmployee = resolvedName;
+    }
+    console.log(`[Steps] Seeded employee name resolved: "${resolvedName}"`);
+  } else if (name.toLowerCase() === 'logged-in employee' || name.toLowerCase() === 'current employee') {
+    resolvedName = await this.assignLeavePage.getLoggedInUsername();
+    console.log(`[Steps] Dynamic employee name resolved: "${resolvedName}"`);
   }
 
-  if (name.toLowerCase() === 'logged-in employee' || name.toLowerCase() === 'current employee') {
-    const loggedInName = await this.assignLeavePage.getLoggedInUsername();
-    console.log(`[Steps] Dynamic employee name resolved: "${loggedInName}"`);
-    await this.assignLeavePage.enterEmployeeName(loggedInName);
-  } else if (name.toLowerCase() === 'seeded employee' || name.toLowerCase() === 'valid employee') {
-    const seededName = await this.assignLeavePage.getSeededEmployeeName();
-    console.log(`[Steps] Seeded employee name resolved: "${seededName}"`);
-    await this.assignLeavePage.enterEmployeeName(seededName);
-    console.log("employee name entered successfully.");
+  if (url.includes('Entitlement') || url.includes('entitlement')) {
+    await this.entitlementsPage.enterEmployeeName(resolvedName);
+    console.log("employee name entered on entitlements page successfully.");
   } else {
-    await this.assignLeavePage.enterEmployeeName(name);
+    await this.assignLeavePage.enterEmployeeName(resolvedName);
     console.log("employee name entered successfully.");  
   }
 });
