@@ -1,210 +1,721 @@
-# Playwright BDD + POM Test Automation Framework
+# 🚀 Playwright BDD Production Framework Architecture
 
-This is a professional-grade, layered test automation framework built with Playwright, Cucumber.js, and TypeScript. It implements industry best practices including the **Page Object Model (POM)** pattern, **Singleton configuration**, and a custom **UIElement locator wrapper** to ensure robust, flaky-resistant UI testing.
-
----
-
-## Architecture
-
-The framework is structured into five distinct layers:
-
-```mermaid
-graph TD
-    A[Gherkin Feature Files .feature] -->|Step Binding| B[Step Definitions .steps.ts]
-    B -->|Page Actions| C[Page Objects .po.ts]
-    C -->|UI Locators & Actions| D[UIElement Wrapper]
-    D -->|Browser Automation| E[Playwright Engine]
-    C -.->|Configurations| F[ConfigManager]
-    C -.->|Artifacts Storage| G[Azure Blob Storage]
-```
-
-1. **BDD Feature Files (`src/features/**/*.feature`)**: Human-readable Gherkin scenarios representing acceptance criteria.
-2. **Step Definitions (`src/steps/**/*.steps.ts`)**: The glue layer matching Gherkin steps to code execution.
-3. **Page Objects (`src/pages/**/*.po.ts`)**: Represents the UI interaction layer, encapsulating selectors and user flows.
-4. **UIElement Wrapper (`src/utils/UIElement.ts`)**: An abstraction layer that wraps Playwright Locators to inject auto-retries, wait logic, and clean action logs.
-5. **Infrastructure Layer (`src/config/`, `src/utils/`)**:
-   - `ConfigManager.ts`: A Singleton class to load environment-specific configuration (`dev`, `staging`, `prod`) and allow overrides.
-   - `BlobStorage.ts`: Azure Blob Storage utility to upload test artifacts (failed screenshots) and retrieve test files.
+> **A Complete Enterprise-Level Playwright + Cucumber (BDD) Framework Architecture Guide**
 
 ---
 
-## Directory Structure
+# 📑 Table of Contents
+
+- [Overview](#-overview)
+- [High-Level Architecture](#-high-level-architecture)
+- [Project Structure](#-project-structure)
+- [Framework Components](#-framework-components)
+- [Execution Flow](#-complete-execution-flow)
+- [Design Patterns](#-design-patterns-used)
+- [Key Advantages](#-key-advantages)
+- [Framework Summary](#-framework-summary)
+
+---
+
+# 📌 Overview
+
+This project follows an **Enterprise Test Automation Framework** built using:
+
+- 🎭 Playwright
+- 🥒 Cucumber (BDD)
+- 📘 TypeScript
+- 📄 Page Object Model (POM)
+- ☁ Azure Blob Storage
+- ⚙ Environment-based Configuration
+- 📊 HTML Reports
+
+The framework is designed to be:
+
+- ✅ Scalable
+- ✅ Maintainable
+- ✅ Reusable
+- ✅ Enterprise Ready
+- ✅ CI/CD Friendly
+
+---
+
+# 🏗 High-Level Architecture
 
 ```text
-├── .github/
-│   └── workflows/
-│       └── ci.yml                     # GitHub Actions CI workflow
-├── src/
-│   ├── config/
-│   │   └── ConfigManager.ts          # Singleton environment configuration manager
-│   ├── features/
-│   │   └── login.feature              # Gherkin Scenario Feature File
-│   ├── hooks/
-│   │   └── hooks.ts                   # Cucumber Before/After hooks & custom World
-│   ├── pages/
-│   │   ├── BasePage.ts                # Base POM container
-│   │   └── Login.po.ts                # Login Page Object
-│   ├── steps/
-│   │   └── login.steps.ts             # Step Definitions mapping file
-│   ├── test-data/
-│   │   ├── config.dev.json            # Development environment configs
-│   │   ├── config.staging.json        # Staging environment configs
-│   │   └── config.prod.json           # Production environment configs
-│   └── utils/
-│       ├── BlobStorage.ts             # Azure Blob Storage Manager
-│       └── UIElement.ts               # Playwright Locator wrapper with retries
-├── .dockerignore                      # Docker context ignore patterns
-├── .env.example                       # Environment file template
-├── .gitignore                         # Git files exclusion patterns
-├── cucumber.js                        # Cucumber.js runner configuration
-├── Dockerfile                         # Playwright container configuration
-├── Jenkinsfile                        # Declarative Jenkins pipeline script
-├── package.json                       # Dependencies & execution scripts
-├── playwright.config.ts               # Multi-browser Playwright global configuration
-└── tsconfig.json                      # Strict TypeScript compiler options
+                          ┌───────────────────────────────┐
+                          │      Feature Files (.feature) │
+                          │      Business Test Scenarios  │
+                          └───────────────┬───────────────┘
+                                          │
+                                          ▼
+                          ┌───────────────────────────────┐
+                          │      Step Definitions         │
+                          │     (Given / When / Then)     │
+                          └───────────────┬───────────────┘
+                                          │
+                                          ▼
+                          ┌───────────────────────────────┐
+                          │      Custom Cucumber World    │
+                          │ Browser • Context • Page      │
+                          └───────────────┬───────────────┘
+                                          │
+                                          ▼
+                          ┌───────────────────────────────┐
+                          │      Page Object Model        │
+                          │      BasePage + Pages         │
+                          └───────────────┬───────────────┘
+                                          │
+                                          ▼
+                          ┌───────────────────────────────┐
+                          │       UIElement Wrapper       │
+                          │ Retry • Wait • Logging • Error│
+                          └───────────────┬───────────────┘
+                                          │
+                                          ▼
+                          ┌───────────────────────────────┐
+                          │      Playwright Browser       │
+                          │ Chromium • Firefox • WebKit   │
+                          └───────────────┬───────────────┘
+                                          │
+                                          ▼
+                          ┌───────────────────────────────┐
+                          │     Azure Blob Storage        │
+                          │ Failure Screenshot Upload     │
+                          └───────────────────────────────┘
 ```
 
 ---
 
-## Setup Instructions
+# 📂 Project Structure
 
-### Prerequisites
-- Node.js (version 18 or higher)
-- npm (Node Package Manager)
-
-### Installation
-1. Clone the repository and navigate to the project root:
-   ```bash
-   npm install
-   ```
-2. Download Playwright-supported browsers and dependencies:
-   ```bash
-   npx playwright install --with-deps
-   ```
-3. Copy `.env.example` to `.env` and configure overrides if necessary:
-   ```bash
-   cp .env.example .env
-   ```
+```text
+Playwright-BDD-ProductionGrid
+│
+├── src
+│   ├── config
+│   ├── features
+│   ├── hooks
+│   ├── pages
+│   ├── steps
+│   ├── utils
+│   └── test-data
+│
+├── playwright.config.ts
+├── cucumber.js
+├── package.json
+└── README.md
+```
 
 ---
 
-## Running Tests
+# 📖 Framework Components
 
-The environment configuration defaults to `dev`. You can switch environments by setting the `ENV` variable (`dev`, `staging`, `prod`).
+---
 
-### 1. Default Run (Development / Headless Mode)
-Runs tests in headless mode (no browser window opens) using development configurations:
+## 🥒 1. Feature Layer
+
+**Location**
+
+```text
+src/features/
+```
+
+Feature files contain business-readable test scenarios written in **Gherkin syntax**.
+
+Example:
+
+```gherkin
+Feature: Login
+
+Scenario: Valid Login
+  Given User opens login page
+  When User enters valid credentials
+  Then User should see dashboard
+```
+
+### Purpose
+
+- Business-readable scenarios
+- Requirement-driven testing
+- Easy collaboration with Product Owners & Business Analysts
+
+---
+
+## 📝 2. Step Definitions
+
+**Location**
+
+```text
+src/steps/
+```
+
+Step definitions connect feature files to Playwright automation.
+
+```text
+Feature File
+      │
+      ▼
+Step Definition
+      │
+      ▼
+Page Object
+```
+
+### Responsibilities
+
+- Map Given / When / Then
+- Call Page Object methods
+- Keep test logic clean
+
+---
+
+## 🌍 3. Custom World (Execution Context)
+
+**Location**
+
+```text
+src/hooks/hooks.ts
+```
+
+Custom World stores shared objects across each scenario.
+
+### Stores
+
+- Browser
+- Browser Context
+- Page
+- Page Objects
+- Test Data
+
+### Architecture
+
+```text
+Scenario
+      │
+      ▼
+Custom World
+      │
+      ├── Browser
+      ├── Context
+      ├── Page
+      ├── LoginPage
+      ├── DashboardPage
+      └── AdminPage
+```
+
+### Benefits
+
+- Shared objects
+- Lazy loading
+- Better memory usage
+- Cleaner code
+
+---
+
+## 🔄 4. Hooks
+
+### BeforeAll
+
+Runs once before all tests.
+
+Responsibilities
+
+- Launch Browser
+- Validate Authentication
+- Generate `user.json`
+
+---
+
+### Before
+
+Runs before every scenario.
+
+Responsibilities
+
+- Create Browser Context
+- Load Authentication
+- Open New Page
+
+---
+
+### After
+
+Runs after every scenario.
+
+Responsibilities
+
+- Capture Screenshot on Failure
+- Attach Screenshot to Report
+- Upload Screenshot to Azure Blob Storage
+
+---
+
+### AfterAll
+
+Runs after all scenarios.
+
+Responsibilities
+
+- Close Browser
+
+---
+
+## 📄 5. Page Object Model (POM)
+
+**Location**
+
+```text
+src/pages/
+```
+
+Every application page has its own class.
+
+```text
+LoginPage
+
+DashboardPage
+
+AdminPage
+
+LeavePage
+```
+
+All pages inherit:
+
+```text
+BasePage
+```
+
+Architecture
+
+```text
+               BasePage
+                   ▲
+                   │
+      ┌────────────┼────────────┐
+      │            │            │
+      ▼            ▼            ▼
+
+ LoginPage   DashboardPage   AdminPage
+```
+
+### Benefits
+
+- Reusable components
+- Easy maintenance
+- Reduced code duplication
+
+---
+
+## 🧩 6. BasePage
+
+Contains common functionality shared across all pages.
+
+Examples
+
+- Navigate
+- Get URL
+- Get Title
+- Common Menu Navigation
+- User Information
+
+---
+
+## 🎯 7. UIElement Wrapper
+
+**Location**
+
+```text
+src/utils/UIElement.ts
+```
+
+Instead of using
+
+```typescript
+await locator.click();
+```
+
+Framework uses
+
+```typescript
+await uiElement.click();
+```
+
+Internally performs
+
+- Retry
+- Logging
+- Wait
+- Visibility Checks
+- Exception Handling
+
+### Flow
+
+```text
+Step Definition
+
+      │
+      ▼
+
+Page Object
+
+      │
+      ▼
+
+UIElement Wrapper
+
+      │
+      ▼
+
+Playwright Locator
+
+      │
+      ▼
+
+Browser
+```
+
+### Benefits
+
+- Stable automation
+- Less flaky tests
+- Better debugging
+
+---
+
+## 🔐 8. Authentication Framework
+
+**Location**
+
+```text
+src/utils/authSetup.ts
+```
+
+Framework performs login only once.
+
+```text
+Login
+
+      │
+      ▼
+
+Save Cookies
+
+      │
+      ▼
+
+Save Local Storage
+
+      │
+      ▼
+
+user.json
+
+      │
+      ▼
+
+Reuse Session
+```
+
+### Benefits
+
+- Faster execution
+- Stable login
+- Reusable authentication
+
+---
+
+## ⚙️ 9. Configuration Manager
+
+**Location**
+
+```text
+src/config/
+```
+
+Uses the **Singleton Design Pattern**.
+
+Supports
+
+```text
+Development
+
+Staging
+
+Production
+```
+
+Reads values from
+
+```text
+.env
+
+Environment Variables
+
+config.dev.json
+
+config.stage.json
+
+config.prod.json
+```
+
+Example
+
+- Browser
+- Base URL
+- Username
+- Password
+- Headless Mode
+
+---
+
+## 🌐 10. Environment Flow
+
+```text
+ENV Variable
+
+      │
+      ▼
+
+Configuration Manager
+
+      │
+      ▼
+
+Load JSON Configuration
+
+      │
+      ▼
+
+Initialize Framework
+```
+
+Switch environment
+
 ```bash
-npm run test
+ENV=dev
 ```
 
-### 2. Run in Headed Mode (Browser UI Visible)
-To launch the headed browser window to see tests execute in real time:
+or
 
-* **Using the Headed NPM Script**:
-  ```bash
-  npm run test:headed
-  ```
-* **Setting the Environment Variable on-the-fly**:
-  You can override the default configuration using the `HEADLESS` environment variable:
-  * **PowerShell**:
-    ```powershell
-    $env:HEADLESS="false"; npm run test
-    ```
-  * **CMD**:
-    ```cmd
-    set HEADLESS=false && npm run test
-    ```
-* **Persistent Configuration**:
-  Change `"headless": true` to `"headless": false` in [config.dev.json](file:///d:/githubclonerepo/PlaywrightBDD/Playwright-BDD-ProductionGrid/src/test-data/config.dev.json).
-
-### 3. Running Specific Tags
-To execute scenarios matching specific tags:
-
-* **Through npm script (using the `--` argument forwarder)**:
-  ```bash
-  npm run test -- --tags "@heroku_004"
-  ```
-* **In headed mode with specific tags**:
-  ```bash
-  npm run test:headed -- --tags "@heroku_004"
-  ```
-* **Directly via npx**:
-  ```bash
-  npx cucumber-js --tags "@smoke"
-  ```
-
-### 4. Run in Specific Environments
-Use the predefined npm scripts:
-- **Staging (Firefox)**:
-  ```bash
-  npm run test:staging
-  ```
-- **Production (Webkit/Safari)**:
-  ```bash
-  npm run test:prod
-  ```
-
-### 5. Run in Parallel
-To execute scenarios concurrently (e.g., with 3 parallel workers):
 ```bash
-npx cucumber-js --parallel 3
+ENV=prod
 ```
 
 ---
 
-## Reporting
+## ☁️ 11. Azure Blob Storage
 
-After running tests, a self-contained, interactive HTML report is automatically saved to `test-results/cucumber-report.html`.
+When a test fails
 
-### How to Open the Report
-- **Using npm script (Windows)**:
-  ```bash
-  npm run report
-  ```
+```text
+Take Screenshot
 
-- **Direct OS-specific commands**:
-  * **Windows**:
-    ```bash
-    start test-results/cucumber-report.html
-    ```
-  * **macOS**:
-    ```bash
-    open test-results/cucumber-report.html
-    ```
-  * **Linux**:
-    ```bash
-    xdg-open test-results/cucumber-report.html
-    ```
+      │
+      ▼
 
----
+Upload to Azure Blob
 
-## Docker Execution
+      │
+      ▼
 
-To package the test suite and run containerized tests:
+Generate Shareable URL
+```
 
-1. **Build the Docker Image**:
-   ```bash
-   docker build -t playwright-bdd-tests .
-   ```
+### Benefits
 
-2. **Run the Container**:
-   Pass environment overrides as environment parameters:
-   ```bash
-   docker run --rm -e ENV=staging -e BROWSER_NAME=firefox playwright-bdd-tests
-   ```
+- Cloud Storage
+- Historical Evidence
+- Easy Sharing
 
 ---
 
-## Azure Blob Storage Integration
+## 📊 12. Reporting
 
-When a test scenario fails, a screenshot is automatically captured, saved locally under `test-results/screenshots/`, and uploaded to the configured Azure Blob Storage container.
+Framework generates
 
-To configure Azure:
-1. Obtain an Azure storage connection string.
-2. Define the credentials in your `.env` file:
-   ```env
-   AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=..."
-   AZURE_CONTAINER_NAME="test-screenshots"
-   ```
-If Azure configurations are left as defaults, the framework log warnings and safely skip cloud uploads to allow local-only executions.
+- HTML Report
+- Screenshots
+- Console Logs
+- Failure Attachments
+
+Report includes
+
+- Passed Tests
+- Failed Tests
+- Duration
+- Error Messages
+- Screenshots
+
+---
+
+# 🚀 Complete Execution Flow
+
+```text
+npm test
+
+      │
+      ▼
+
+Authentication Setup
+
+      │
+      ▼
+
+Launch Browser
+
+      │
+      ▼
+
+Load Feature Files
+
+      │
+      ▼
+
+Execute Step Definitions
+
+      │
+      ▼
+
+Page Objects
+
+      │
+      ▼
+
+UIElement Wrapper
+
+      │
+      ▼
+
+Playwright Browser
+
+      │
+      ▼
+
+Execute Test
+
+      │
+      ▼
+
+────────────────────────
+
+PASS
+
+      │
+      ▼
+
+Generate HTML Report
+
+────────────────────────
+
+FAIL
+
+      │
+      ▼
+
+Take Screenshot
+
+      │
+      ▼
+
+Upload Screenshot to Azure Blob
+
+      │
+      ▼
+
+Attach Screenshot to Report
+
+      │
+      ▼
+
+Generate HTML Report
+
+────────────────────────
+
+      │
+      ▼
+
+Close Browser
+```
+
+---
+
+# 🎯 Design Patterns Used
+
+| Pattern | Purpose |
+|----------|---------|
+| **Page Object Model (POM)** | Encapsulates page interactions |
+| **Singleton** | Configuration Manager |
+| **Wrapper Pattern** | UIElement wrapper around Playwright Locator |
+| **Factory / Lazy Initialization** | Create Page Objects only when required |
+| **Hook Pattern** | Test lifecycle management |
+| **BDD Pattern** | Business-readable scenarios |
+
+---
+
+# ⭐ Key Advantages
+
+- ✅ Enterprise-grade architecture
+- ✅ Highly scalable
+- ✅ Easy maintenance
+- ✅ Business-readable scenarios
+- ✅ Cross-browser support
+- ✅ Parallel execution
+- ✅ Reusable Page Objects
+- ✅ Smart Retry Mechanism
+- ✅ Environment-specific configuration
+- ✅ Authentication reuse
+- ✅ Automatic screenshots on failures
+- ✅ Azure Blob Storage integration
+- ✅ Rich HTML reporting
+- ✅ CI/CD pipeline ready
+
+---
+
+# 📌 Framework Summary
+
+```text
+Feature Files
+      │
+      ▼
+Step Definitions
+      │
+      ▼
+Custom World
+      │
+      ▼
+Page Objects
+      │
+      ▼
+BasePage
+      │
+      ▼
+UIElement Wrapper
+      │
+      ▼
+Playwright Engine
+      │
+      ▼
+Browser
+      │
+      ▼
+Reports • Azure Blob Storage
+```
+
+---
+
+# 🎉 Conclusion
+
+This framework follows a **Layered Enterprise Architecture**, where each layer has a single responsibility.
+
+It combines:
+
+- 🎭 Playwright for browser automation
+- 🥒 Cucumber for Behavior Driven Development
+- 📄 Page Object Model for maintainability
+- 🎯 UIElement Wrapper for resilient UI interactions
+- ⚙️ Configuration Manager for environment flexibility
+- ☁️ Azure Blob Storage for artifact management
+- 📊 Rich HTML Reporting for execution visibility
+
+This architecture ensures the framework is **robust**, **scalable**, **maintainable**, **reusable**, and **production-ready** for enterprise automation testing.
